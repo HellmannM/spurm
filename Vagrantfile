@@ -1,7 +1,7 @@
 
 $packages = <<-SCRIPT
     yum install -y epel-release
-    yum install -y htop git tig perl
+    yum install -y htop git tig perl curl wget
     yum install -y gcc make cmake rpm-build
 SCRIPT
 
@@ -10,7 +10,7 @@ $packagesDevel = <<-SCRIPT
 SCRIPT
 
 $packagesSlurm = <<-SCRIPT
-    yum install -y rng-tools openssl openssl-devel pam-devel numactl numactl-devel hwloc hwloc-devel lua lua-devel readline-devel rrdtool-devel ncurses-devel man2html libibmad libibumad
+    yum install -y python3 perl-ExtUtils-MakeMaker perl-Switch rng-tools openssl openssl-devel pam-devel numactl numactl-devel hwloc hwloc-devel lua lua-devel readline-devel rrdtool-devel ncurses-devel man2html libibmad libibumad
 SCRIPT
 
 $installMariadbAndMunge = <<-SCRIPT
@@ -22,7 +22,7 @@ $installMariadbAndMunge = <<-SCRIPT
     groupadd -g $SLURMUSER slurm
     useradd  -m -c "SLURM workload manager" -d /var/lib/slurm -u $SLURMUSER -g slurm  -s /bin/bash slurm
     yum install -y munge munge-libs munge-devel
-SCIRPT
+SCRIPT
 
 $createMungeKey = <<-SCRIPT
     rngd -r /dev/urandom
@@ -44,15 +44,26 @@ $startMunge = <<-SCRIPT
     systemctl start munge
 SCRIPT
 
-#TODO hardcode rpms to be installed
 $installSlurm = <<-SCRIPT
     wget https://download.schedmd.com/slurm/slurm-20.02.1.tar.bz2
     rpmbuild -ta slurm-20.02.1.tar.bz2
-    yum --nogpgcheck localinstall /root/rpmbuild/RPMS/x68_64/slurm-*
+    yum --nogpgcheck localinstall -y \
+        /root/rpmbuild/RPMS/x86_64/slurm-20.02.1-1.el7.x86_64.rpm \
+        /root/rpmbuild/RPMS/x86_64/slurm-perlapi-20.02.1-1.el7.x86_64.rpm \
+        /root/rpmbuild/RPMS/x86_64/slurm-devel-20.02.1-1.el7.x86_64.rpm \
+        /root/rpmbuild/RPMS/x86_64/slurm-example-configs-20.02.1-1.el7.x86_64.rpm \
+        /root/rpmbuild/RPMS/x86_64/slurm-slurmctld-20.02.1-1.el7.x86_64.rpm \
+        /root/rpmbuild/RPMS/x86_64/slurm-slurmd-20.02.1-1.el7.x86_64.rpm \
+        /root/rpmbuild/RPMS/x86_64/slurm-slurmdbd-20.02.1-1.el7.x86_64.rpm \
+        /root/rpmbuild/RPMS/x86_64/slurm-libpmi-20.02.1-1.el7.x86_64.rpm \
+        /root/rpmbuild/RPMS/x86_64/slurm-torque-20.02.1-1.el7.x86_64.rpm \
+        /root/rpmbuild/RPMS/x86_64/slurm-openlava-20.02.1-1.el7.x86_64.rpm \
+        /root/rpmbuild/RPMS/x86_64/slurm-contribs-20.02.1-1.el7.x86_64.rpm \
+        /root/rpmbuild/RPMS/x86_64/slurm-pam_slurm-20.02.1-1.el7.x86_64.rpm
 SCRIPT
 
 $configureSlurmServer = <<-SCRIPT
-    mkdir /var/spool/slurmctld
+    mkdir -p /var/spool/slurmctld
     chown slurm: /var/spool/slurmctld
     chmod 755 /var/spool/slurmctld
     touch /var/log/slurmctld.log
@@ -70,7 +81,7 @@ $configureSlurmServer = <<-SCRIPT
 SCRIPT
 
 $configureSlurmWorker = <<-SCRIPT
-    mkdir /var/spool/slurmd
+    mkdir -p /var/spool/slurmd
     chown slurm: /var/spool/slurmd
     chmod 755 /var/spool/slurmd
     touch /var/log/slurmd.log
@@ -88,7 +99,7 @@ SCRIPT
 
 #TODO
 $installSpark = <<-SCRIPT
-SCIRPT
+SCRIPT
 
 $cloneMagpie = <<-SCRIPT
     git clone https://github.com/LLNL/magpie.git
@@ -97,6 +108,7 @@ SCRIPT
 
 Vagrant.configure("2") do |config|
     config.vm.box = "centos/7"
+    config.vm.box_version = "1905.1"
     config.vm.hostname = "slurm-server"
 #    config.vm.hostname = "slurm-worker"
     
@@ -105,9 +117,9 @@ Vagrant.configure("2") do |config|
         v.cpus = 8
     end
     
-    config.vm.network "public_network"
+#    config.vm.network "public_network", ip: "..."
 #    config.vm.base_address "192.168.1.123"
-    config.disksize.size = "20GB"
+#    config.disksize.size = "20GB"
     
     config.vm.provision "shell", inline: $packages
     config.vm.provision "shell", inline: $packagesDevel
@@ -120,7 +132,8 @@ Vagrant.configure("2") do |config|
     config.vm.provision "shell", inline: $installSlurm
 
 #   https://slurm.schedmd.com/configurator.easy.html
-    config.vm.provision "file", source: "./slurm.conf", destination: "/etc/slurm/slurm.conf"
+    config.vm.provision "file", source: "./slurm.conf", destination: "/tmp/slurm.conf"
+    config.vm.provision "shell", inline: "mkdir -p /etc/slurm && cp /tmp/slurm.conf /etc/slurm/slurm.conf"
     config.vm.provision "shell", inline: $configureSlurmServer
 #    config.vm.provision "shell", inline: $configureSlurmWorker
 #    config.vm.provision "shell", inline: $disableFirewall
