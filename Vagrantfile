@@ -93,6 +93,18 @@ $disableFirewall = <<-SCRIPT
     systemctl disable firewalld
 SCRIPT
 
+$installJava = <<-SCRIPT
+    yum install -y java-1.8.0-openjdk
+    echo 'export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk' | sudo tee -a /etc/profile
+    echo 'export JRE_HOME=/usr/lib/jvm/jre' | sudo tee -a /etc/profile
+    source /etc/profile
+SCRIPT
+
+$installScala = <<-SCRIPT
+    wget https://downloads.lightbend.com/scala/2.13.1/scala-2.13.1.rpm
+    yum localinstall -y scala-2.13.1.rpm
+SCRIPT
+
 #TODO
 $installSpark = <<-SCRIPT
 SCRIPT
@@ -109,8 +121,8 @@ Vagrant.configure("2") do |config|
 #    config.vm.hostname = "slurmvm2"
     
     config.vm.provider "virtualbox" do |v|
-        v.memory = 1024*8
-        v.cpus = 4
+        v.memory = 1024*4
+        v.cpus = 2
     end
     
 #TODO
@@ -137,5 +149,7 @@ Vagrant.configure("2") do |config|
 #TODO add key first?
 #    config.vm.provision "shell", inline: $cloneMagpie
 
+    config.vm.provision "shell", inline: $installJava
+    config.vm.provision "shell", inline: $installScala
 #    config.vm.provision "shell", inline: $installSpark
 end
