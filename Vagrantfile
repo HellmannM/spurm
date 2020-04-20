@@ -45,7 +45,7 @@ $startMunge = <<-SCRIPT
 SCRIPT
 
 $installSlurm = <<-SCRIPT
-    wget https://download.schedmd.com/slurm/slurm-20.02.1.tar.bz2
+    wget -q https://download.schedmd.com/slurm/slurm-20.02.1.tar.bz2
     rpmbuild -ta slurm-20.02.1.tar.bz2
     yum --nogpgcheck localinstall -y \
         /root/rpmbuild/RPMS/x86_64/slurm-20.02.1-1.el7.x86_64.rpm \
@@ -101,7 +101,7 @@ $installJava = <<-SCRIPT
 SCRIPT
 
 $installScala = <<-SCRIPT
-    wget https://downloads.lightbend.com/scala/2.13.1/scala-2.13.1.rpm
+    wget -q https://downloads.lightbend.com/scala/2.13.1/scala-2.13.1.rpm
     yum localinstall -y scala-2.13.1.rpm
 SCRIPT
 
