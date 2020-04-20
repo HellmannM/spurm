@@ -1,6 +1,6 @@
-spark + slurm = spurm
+spark + slurm = ...
 
 Create VM testing cluster for running spark apps inside slurm jobs.
 
-TODO add installation of spark (+java?) to Vagrantfile
-TODO modify Vagrantfile to setup a second VM as slurm-worker
+TODO install Spark (which version?)
+TODO build 2nd VM
