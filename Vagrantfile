@@ -71,10 +71,6 @@ $configureSlurmServer = <<-SCRIPT
     touch /var/log/slurm_jobacct.log /var/log/slurm_jobcomp.log
     chown slurm: /var/log/slurm_jobacct.log /var/log/slurm_jobcomp.log
 
-    systemctl enable slurmd.service
-    systemctl start slurmd.service
-    systemctl status slurmd.service
-
     systemctl enable slurmctld.service
     systemctl start slurmctld.service
     systemctl status slurmctld.service
@@ -109,17 +105,17 @@ SCRIPT
 Vagrant.configure("2") do |config|
     config.vm.box = "centos/7"
     config.vm.box_version = "1905.1"
-    config.vm.hostname = "slurm-server"
-#    config.vm.hostname = "slurm-worker"
+    config.vm.hostname = "slurmvm1"
+#    config.vm.hostname = "slurmvm2"
     
     config.vm.provider "virtualbox" do |v|
-        v.memory = 1024*4
-        v.cpus = 8
+        v.memory = 1024*8
+        v.cpus = 4
     end
     
+#TODO
 #    config.vm.network "public_network", ip: "..."
 #    config.vm.base_address "192.168.1.123"
-#    config.disksize.size = "20GB"
     
     config.vm.provision "shell", inline: $packages
     config.vm.provision "shell", inline: $packagesDevel
@@ -135,9 +131,11 @@ Vagrant.configure("2") do |config|
     config.vm.provision "file", source: "./slurm.conf", destination: "/tmp/slurm.conf"
     config.vm.provision "shell", inline: "mkdir -p /etc/slurm && cp /tmp/slurm.conf /etc/slurm/slurm.conf"
     config.vm.provision "shell", inline: $configureSlurmServer
-#    config.vm.provision "shell", inline: $configureSlurmWorker
+    config.vm.provision "shell", inline: $configureSlurmWorker
 #    config.vm.provision "shell", inline: $disableFirewall
 
-#    config.vm.provision "shell", inline: $installSpark
+#TODO add key first?
 #    config.vm.provision "shell", inline: $cloneMagpie
+
+#    config.vm.provision "shell", inline: $installSpark
 end
