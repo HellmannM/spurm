@@ -152,7 +152,7 @@ Vagrant.configure("2") do |config|
 	    vm1.vm.provision "file", source: "./slurm.conf", destination: "/tmp/slurm.conf"
 	    vm1.vm.provision "shell", inline: "mkdir -p /etc/slurm && cp /tmp/slurm.conf /etc/slurm/slurm.conf"
 	    vm1.vm.provision "shell", inline: $configureSlurmServer
-	    vm1.vm.provision "shell", inline: $configureSlurmWorker
+	#   vm1.vm.provision "shell", inline: $configureSlurmWorker
 	#   vm1.vm.provision "shell", inline: $disableFirewall
 
 	#TODO add key first?
@@ -191,7 +191,7 @@ Vagrant.configure("2") do |config|
 	#   https://slurm.schedmd.com/configurator.easy.html
 	    vm2.vm.provision "file", source: "./slurm.conf", destination: "/tmp/slurm.conf"
 	    vm2.vm.provision "shell", inline: "mkdir -p /etc/slurm && cp /tmp/slurm.conf /etc/slurm/slurm.conf"
-	    vm2.vm.provision "shell", inline: $configureSlurmServer
+	#   vm2.vm.provision "shell", inline: $configureSlurmServer
 	    vm2.vm.provision "shell", inline: $configureSlurmWorker
 	#   vm2.vm.provision "shell", inline: $disableFirewall
 
