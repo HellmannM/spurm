@@ -107,6 +107,14 @@ SCRIPT
 
 #TODO
 $installSpark = <<-SCRIPT
+
+	curl -O https://archive.apache.org/dist/spark/spark-2.4.4/spark-2.4.4-bin-hadoop2.7.tgz
+	tar xvf spark-2.4.4-bin-hadoop2.7.tgz
+	sudo mv spark-2.4.4-bin-hadoop2.7/ /opt/spark
+	echo 'export SPARK_HOME=/opt/spark' >> ~/.bashrc
+	echo 'export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin' >> ~/.bashrc
+	source ~/.bashrc
+
 SCRIPT
 
 $cloneMagpie = <<-SCRIPT
@@ -115,41 +123,84 @@ SCRIPT
 
 
 Vagrant.configure("2") do |config|
-    config.vm.box = "centos/7"
-    config.vm.box_version = "1905.1"
-    config.vm.hostname = "slurmvm1"
-#    config.vm.hostname = "slurmvm2"
-    
-    config.vm.provider "virtualbox" do |v|
-        v.memory = 1024*4
-        v.cpus = 2
-    end
-    
-#TODO
-#    config.vm.network "public_network", ip: "..."
-#    config.vm.base_address "192.168.1.123"
-    
-    config.vm.provision "shell", inline: $packages
-    config.vm.provision "shell", inline: $packagesDevel
-    config.vm.provision "shell", inline: $packagesSlurm
+    config.vm.define "node1" do |vm1|
+	    vm1.vm.box = "centos/7"
+	    vm1.vm.box_version = "1905.1"
+	    vm1.vm.hostname = "slurmvm1"
+	    vm1.vm.network "private_network", ip: "192.168.33.10"
+	    
+	    vm1.vm.provider "virtualbox" do |v|
+		v.memory = 1024
+		v.cpus = 2
+	    end
+	    
+	#TODO
+	#   vm1.vm.network "public_network", ip: "..."
+	#   vm1.vm.base_address "192.168.1.123"
+	    
+	    vm1.vm.provision "shell", inline: $packages
+	    vm1.vm.provision "shell", inline: $packagesDevel
+	    vm1.vm.provision "shell", inline: $packagesSlurm
 
-    config.vm.provision "shell", inline: $installMariadbAndMunge
-    config.vm.provision "shell", inline: $createMungeKey
-#    config.vm.provision "shell", inline: $copyMungeKey
-    config.vm.provision "shell", inline: $startMunge
-    config.vm.provision "shell", inline: $installSlurm
+	    vm1.vm.provision "shell", inline: $installMariadbAndMunge
+	    vm1.vm.provision "shell", inline: $createMungeKey
+	#   vm1.vm.provision "shell", inline: $copyMungeKey
+	    vm1.vm.provision "shell", inline: $startMunge
+	    vm1.vm.provision "shell", inline: $installSlurm
 
-#   https://slurm.schedmd.com/configurator.easy.html
-    config.vm.provision "file", source: "./slurm.conf", destination: "/tmp/slurm.conf"
-    config.vm.provision "shell", inline: "mkdir -p /etc/slurm && cp /tmp/slurm.conf /etc/slurm/slurm.conf"
-    config.vm.provision "shell", inline: $configureSlurmServer
-    config.vm.provision "shell", inline: $configureSlurmWorker
-#    config.vm.provision "shell", inline: $disableFirewall
+	#   https://slurm.schedmd.com/configurator.easy.html
+	    vm1.vm.provision "file", source: "./slurm.conf", destination: "/tmp/slurm.conf"
+	    vm1.vm.provision "shell", inline: "mkdir -p /etc/slurm && cp /tmp/slurm.conf /etc/slurm/slurm.conf"
+	    vm1.vm.provision "shell", inline: $configureSlurmServer
+	    vm1.vm.provision "shell", inline: $configureSlurmWorker
+	#   vm1.vm.provision "shell", inline: $disableFirewall
 
-#TODO add key first?
-#    config.vm.provision "shell", inline: $cloneMagpie
+	#TODO add key first?
+	#   vm1.vm.provision "shell", inline: $cloneMagpie
 
-    config.vm.provision "shell", inline: $installJava
-    config.vm.provision "shell", inline: $installScala
-#    config.vm.provision "shell", inline: $installSpark
+	    vm1.vm.provision "shell", inline: $installJava
+	    vm1.vm.provision "shell", inline: $installScala
+	    vm1.vm.provision "shell", inline: $installSpark
+	end
+
+	config.vm.define "node2" do |vm2|
+	    vm2.vm.box = "centos/7"
+	    vm2.vm.box_version = "1905.1"
+	    vm2.vm.hostname = "slurmvm2"
+	    vm2.vm.network "private_network", ip: "192.168.33.20"
+	    
+	    vm2.vm.provider "virtualbox" do |v|
+		v.memory = 1024
+		v.cpus = 2
+	    end
+	    
+	#TODO
+	#   vm2.vm.network "public_network", ip: "..."
+	#   vm2.vm.base_address "192.168.1.123"
+	    
+	    vm2.vm.provision "shell", inline: $packages
+	    vm2.vm.provision "shell", inline: $packagesDevel
+	    vm2.vm.provision "shell", inline: $packagesSlurm
+
+	    vm2.vm.provision "shell", inline: $installMariadbAndMunge
+	    vm2.vm.provision "shell", inline: $createMungeKey
+	#   vm2.vm.provision "shell", inline: $copyMungeKey
+	    vm2.vm.provision "shell", inline: $startMunge
+	    vm2.vm.provision "shell", inline: $installSlurm
+
+	#   https://slurm.schedmd.com/configurator.easy.html
+	    vm2.vm.provision "file", source: "./slurm.conf", destination: "/tmp/slurm.conf"
+	    vm2.vm.provision "shell", inline: "mkdir -p /etc/slurm && cp /tmp/slurm.conf /etc/slurm/slurm.conf"
+	    vm2.vm.provision "shell", inline: $configureSlurmServer
+	    vm2.vm.provision "shell", inline: $configureSlurmWorker
+	#   vm2.vm.provision "shell", inline: $disableFirewall
+
+	#TODO add key first?
+	#   vm2.vm.provision "shell", inline: $cloneMagpie
+
+	    vm2.vm.provision "shell", inline: $installJava
+	    vm2.vm.provision "shell", inline: $installScala
+	    vm2.vm.provision "shell", inline: $installSpark
+	end
+
 end
