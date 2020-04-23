@@ -2,9 +2,20 @@ spark + slurm = ...
 
 Create VM testing cluster for running spark apps inside slurm jobs.
 
-The address of first VM is 198.168.33.10 and second VM is 192.168.33.10
+How to use:
 
-TODO - Kindly update the .bashrc files in both the VMs for running spark                                
-echo 'export SPARK_HOME=/opt/spark' >> ~/.bashrc            
-echo 'export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin' >> ~/.bashrc                              
-source ~/.bashrc
+$ vagrant up
+$ vagrant ssh [VM-NAME]
+
+VM-NAME     HOSTNAME    ADDR
+-------------------------------------
+slurmvm1    slurmvm1    192.168.33.10
+slurmvm2    slurmvm2    192.168.33.11
+
+Slurm configuration was created with:
+https://slurm.schedmd.com/configurator.easy.html
+
+
+TODO
+-enable firewall and open ports instead
+-nodes are stuck in state 'drain'
