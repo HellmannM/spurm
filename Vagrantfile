@@ -127,8 +127,18 @@ $cloneMagpie = <<-SCRIPT
 SCRIPT
 
 $editHosts = <<-SCRIPT
-    echo '192.168.33.10 slurmvm1' >> /etc/hosts
-    echo '192.168.33.11 slurmvm2' >> /etc/hosts
+#    echo '192.168.33.10 slurmvm1' >> /etc/hosts
+#    echo '192.168.33.11 slurmvm2' >> /etc/hosts
+    echo '10.0.0.10 slurmvm1' >> /etc/hosts
+    echo '10.0.0.11 slurmvm2' >> /etc/hosts
+SCRIPT
+
+$fixKeys = <<-SCRIPT
+    cat /home/vagrant/.ssh/id_rsa.pub /home/vagrant/.ssh/authorized_keys
+    chown vagrant: /home/vagrant/.ssh/id_rsa
+    chown vagrant: /home/vagrant/.ssh/id_rsa.pub
+    chmod 600 /home/vagrant/.ssh/id_rsa
+    chmod 644 /home/vagrant/.ssh/id_rsa.pub
 SCRIPT
 
 Vagrant.configure("2") do |config|
@@ -136,12 +146,17 @@ Vagrant.configure("2") do |config|
         vm1.vm.box = "centos/7"
         vm1.vm.box_version = "1905.1"
         vm1.vm.hostname = "slurmvm1"
-        vm1.vm.network "private_network", ip: "192.168.33.10"
+#        vm1.vm.network "private_network", ip: "192.168.33.10"
+        vm1.vm.network "private_network", ip: "10.0.0.10"
         
         vm1.vm.provider "virtualbox" do |v|
             v.memory = 4096
-            v.cpus = 2
+            v.cpus = 4
         end
+
+        vm1.vm.provision "file", source: "./id_rsa", destination: "/home/vagrant/.ssh/id_rsa"
+        vm1.vm.provision "file", source: "./id_rsa.pub", destination: "/home/vagrant/.ssh/id_rsa.pub"
+        vm1.vm.provision "shell", inline: $fixKeys
         
         vm1.vm.provision "shell", inline: $packages
         vm1.vm.provision "shell", inline: $packagesDevel
@@ -173,12 +188,17 @@ Vagrant.configure("2") do |config|
         vm2.vm.box = "centos/7"
         vm2.vm.box_version = "1905.1"
         vm2.vm.hostname = "slurmvm2"
-        vm2.vm.network "private_network", ip: "192.168.33.11"
+#        vm2.vm.network "private_network", ip: "192.168.33.11"
+        vm2.vm.network "private_network", ip: "10.0.0.11"
         
         vm2.vm.provider "virtualbox" do |v|
             v.memory = 4096
-            v.cpus = 2
+            v.cpus = 4
         end
+
+        vm2.vm.provision "file", source: "./id_rsa", destination: "/home/vagrant/.ssh/id_rsa"
+        vm2.vm.provision "file", source: "./id_rsa.pub", destination: "/home/vagrant/.ssh/id_rsa.pub"
+        vm2.vm.provision "shell", inline: $fixKeys
         
         vm2.vm.provision "shell", inline: $packages
         vm2.vm.provision "shell", inline: $packagesDevel
