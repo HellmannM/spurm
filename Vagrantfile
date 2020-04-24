@@ -134,7 +134,7 @@ $editHosts = <<-SCRIPT
 SCRIPT
 
 $fixKeys = <<-SCRIPT
-    cat /home/vagrant/.ssh/id_rsa.pub /home/vagrant/.ssh/authorized_keys
+    cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
     chown vagrant: /home/vagrant/.ssh/id_rsa
     chown vagrant: /home/vagrant/.ssh/id_rsa.pub
     chmod 600 /home/vagrant/.ssh/id_rsa
