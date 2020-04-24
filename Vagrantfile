@@ -146,8 +146,8 @@ Vagrant.configure("2") do |config|
         vm1.vm.network "private_network", ip: "10.0.0.10"
         
         vm1.vm.provider "virtualbox" do |v|
-            v.memory = 4096
-            v.cpus = 4
+            v.memory = 2048
+            v.cpus = 2
         end
 
         vm1.vm.provision "file", source: "./id_rsa", destination: "/home/vagrant/.ssh/id_rsa"
@@ -187,8 +187,8 @@ Vagrant.configure("2") do |config|
         vm2.vm.network "private_network", ip: "10.0.0.11"
         
         vm2.vm.provider "virtualbox" do |v|
-            v.memory = 4096
-            v.cpus = 4
+            v.memory = 2048
+            v.cpus = 2
         end
 
         vm2.vm.provision "file", source: "./id_rsa", destination: "/home/vagrant/.ssh/id_rsa"
