@@ -117,9 +117,8 @@ $installSpark = <<-SCRIPT
 SCRIPT
 
 $exportSparkVars = <<-SCRIPT
-   echo 'export SPARK_HOME=/opt/spark' >> ~/.bashrc            
-   echo 'export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin' >> ~/.bashrc
-   source ~/.bashrc
+   echo 'export SPARK_HOME=/opt/spark' >> /home/vagrant/.bashrc            
+   echo 'export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin' >> /home/vagrant/.bashrc
 SCRIPT
 
 $cloneMagpie = <<-SCRIPT
@@ -127,8 +126,6 @@ $cloneMagpie = <<-SCRIPT
 SCRIPT
 
 $editHosts = <<-SCRIPT
-#    echo '192.168.33.10 slurmvm1' >> /etc/hosts
-#    echo '192.168.33.11 slurmvm2' >> /etc/hosts
     echo '10.0.0.10 slurmvm1' >> /etc/hosts
     echo '10.0.0.11 slurmvm2' >> /etc/hosts
 SCRIPT
@@ -146,7 +143,6 @@ Vagrant.configure("2") do |config|
         vm1.vm.box = "centos/7"
         vm1.vm.box_version = "1905.1"
         vm1.vm.hostname = "slurmvm1"
-#        vm1.vm.network "private_network", ip: "192.168.33.10"
         vm1.vm.network "private_network", ip: "10.0.0.10"
         
         vm1.vm.provider "virtualbox" do |v|
@@ -188,7 +184,6 @@ Vagrant.configure("2") do |config|
         vm2.vm.box = "centos/7"
         vm2.vm.box_version = "1905.1"
         vm2.vm.hostname = "slurmvm2"
-#        vm2.vm.network "private_network", ip: "192.168.33.11"
         vm2.vm.network "private_network", ip: "10.0.0.11"
         
         vm2.vm.provider "virtualbox" do |v|
