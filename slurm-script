@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+# Example script for running spark within slurm.
+#
+# Some quick notes:
+# `ntasks-per-node` defines how many executors are launched per node. Spark's
+# default is to assign one CPU per executor. If your app is multi-threaded you
+# will need to adjust `cpus-per-task` accordingly. Keep in mind that
+# (`ntasks-per-node` * `cpus-per-task`) should not exceed the number of CPUs on
+# the node. We then launch spark with `--total-executor-cores` so that it can
+# use multiple cores per executor.
+# In this example we launch a total of 2x7=14 executors across 2 nodes and tell
+# Spark that it can use up to 2*7*4=56 cores.
+
+#SBATCH --job-name=<CHOOSE_A_NAME>  # name of your slurm job
+#SBATCH --partition=<SEL_PARTITION> # select a partition
+#SBATCH --time=00:10:00             # run-time limit (hh:mm:ss)
+#SBATCH --nodes=2                   # number of nodes
+#SBATCH --ntasks-per-node=7         # number of tasks (executors) per node
+#SBATCH --cpus-per-task=4           # number of cores per task (executor)
+#SBATCH --mem=40G                   # memory per node
+
+module purge
+module load spark
+spark-start
+
+# Calculate memory per executor
+executor_memory=$(($SLURM_MEM_PER_NODE / $SLURM_NTASKS_PER_NODE))
+# Calculate total number of cores allocated
+total_executor_cores=$(($SLURM_NNODES * $SLURM_NTASKS_PER_NODE * $SLURM_CPUS_PER_TASK))
+
+#TODO double-check that default unit for SLURM_MEM_PER_NODE is MB...
+spark-submit --total-executor-cores ${total_executor_cores} \
+        --executor-memory ${executor_memory}M \
+        <YOUR_APPLICATION> [ARGS]
+
