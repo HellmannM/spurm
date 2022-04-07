@@ -130,6 +130,10 @@ $editHosts = <<-SCRIPT
     echo '10.0.0.11 slurmvm2' >> /etc/hosts
 SCRIPT
 
+$generateKeys = <<-SCRIPT
+    ssh-keygen -b 4096 -t rsa -C "Vagrant key" -f vagrant_key -N "" -q <<< $'y\n' >/dev/null 2>&1
+SCRIPT
+
 $fixKeys = <<-SCRIPT
     cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
     chown vagrant: /home/vagrant/.ssh/id_rsa
@@ -150,8 +154,9 @@ Vagrant.configure("2") do |config|
             v.cpus = 2
         end
 
-        vm1.vm.provision "file", source: "./id_rsa", destination: "/home/vagrant/.ssh/id_rsa"
-        vm1.vm.provision "file", source: "./id_rsa.pub", destination: "/home/vagrant/.ssh/id_rsa.pub"
+        vm1.vm.provision "shell", inline: $generateKeys
+        vm1.vm.provision "file", source: "./vagrant_key", destination: "/home/vagrant/.ssh/id_rsa"
+        vm1.vm.provision "file", source: "./vagrant_key.pub", destination: "/home/vagrant/.ssh/id_rsa.pub"
         vm1.vm.provision "shell", inline: $fixKeys
         
         vm1.vm.provision "shell", inline: $packages
